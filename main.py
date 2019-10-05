@@ -36,7 +36,7 @@ print(fraud_labels.head())
 #Feature Selection
 X_train, X_test, y_train, y_test = train_test_split(df, fraud_labels, test_size=0.2, random_state=0)
 k=10
-mi_transformer = SelectKBest(mutual_info_regression, k=4).fit(X_train, y_train)
+mi_transformer = SelectKBest(mutual_info_regression, k=k).fit(X_train, y_train)
 mi_X_train = mi_transformer.transform(X_train)
 mi_X_test = mi_transformer.transform(X_test)
 
