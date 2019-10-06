@@ -3,9 +3,11 @@ import numpy as np
 import io
 from sklearn.model_selection import train_test_split
 from sklearn.feature_selection import SelectKBest, mutual_info_regression, RFE
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.svm import SVC # SVM classifier model
 
 
-inputDataFrame = pd.read_csv('../data.csv')
+inputDataFrame = pd.read_csv('data.csv')
 inputDataFrame.dropna(inplace=True)
 assert inputDataFrame.isnull().sum().sum() == 0
 def f(name):
@@ -44,3 +46,34 @@ mi_X_train,mi_X_test = mi_transformer.transform(X_train), mi_transformer.transfo
 
 for feature, importance in zip(fraud_features.columns, mi_transformer.scores_):
     print(f"The MI score for {feature} is {importance}")
+
+
+#SVM model
+hyperparams = {
+    "C": [1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1, 1e2, 1e3, 1e4],
+    "random_state": [0]
+}
+svc = SVC(gamma='auto')
+clf = GridSearchCV(svc, hyperparams, scoring='accuracy')
+clf.fit(mi_X_train, y_train)
+testScore = clf.score(mi_X_test, y_test)
+print("SVM Accuracy: ", testScore)
+optional = False
+if(optional):
+  C = 1.0  # SVM regularization parameter
+  models = (sk.svm.SVC(kernel='linear', C=C),
+    sk.svm.LinearSVC(C=C),
+    sk.svm.SVC(kernel='rbf', gamma=0.7, C=C),
+    sk.svm.SVC(kernel='poly', degree=3, C=C))
+  models = (clf.fit(X, y) for clf in models)
+
+
+
+
+
+
+
+
+
+
+
