@@ -3,7 +3,8 @@ import numpy as np
 import io
 from sklearn.model_selection import train_test_split
 from sklearn.feature_selection import SelectKBest, mutual_info_regression, RFE
-
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import confusion_matrix
 
 inputDataFrame = pd.read_csv('../data.csv')
 inputDataFrame.dropna(inplace=True)
@@ -42,5 +43,21 @@ k=5
 mi_transformer = SelectKBest(mutual_info_regression,k=k).fit(X_train, y_train)
 mi_X_train,mi_X_test = mi_transformer.transform(X_train), mi_transformer.transform(X_test)
 
-for feature, importance in zip(fraud_features.columns, mi_transformer.scores_):
-    print(f"The MI score for {feature} is {importance}")
+# for feature, importance in zip(fraud_features.columns, mi_transformer.scores_):
+#     print(f"The MI score for {feature} is {importance}")
+
+#Random forest with all features
+clf_w_allFeatures = RandomForestClassifier(n_estimators=100,random_state=0)
+clf_w_allFeatures.fit(X_train,y_train)
+print("RandomForestClassifier score without any feature selection is :",clf_w_allFeatures.score(X_test,y_test))
+predictions = clf_w_allFeatures.predict(X_test)
+conf_mat = confusion_matrix(y_test, predictions)
+print("Confusion Matrix with all features ",conf_mat)
+
+#Random forest with selected features
+clf_w_selected_features = RandomForestClassifier(n_estimators=100,random_state=0)
+clf_w_selected_features.fit(mi_X_train,y_train)
+print("RandomForestClassifier score with feature selection is :",clf_w_selected_features.score(mi_X_test,y_test))
+predictions = clf_w_selected_features.predict(mi_X_test)
+conf_mat = confusion_matrix(y_test, predictions)
+print("Confusion Matrix with selected features ",conf_mat)
