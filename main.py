@@ -6,6 +6,9 @@ from sklearn.feature_selection import SelectKBest, mutual_info_regression, RFE
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import confusion_matrix
 
+number_of_fraud_trans = 86
+number_of_non_fraud_trans = 49914
+
 inputDataFrame = pd.read_csv('../data.csv')
 inputDataFrame.dropna(inplace=True)
 assert inputDataFrame.isnull().sum().sum() == 0
@@ -28,8 +31,9 @@ inputDataFrame.drop(columns=["type","isFlaggedFraud"], inplace=True)
 
 #samplying the non fradulent with all fradulent data
 all_fraud = inputDataFrame.query('isFraud==1')
+all_fraud= all_fraud.sample(n=number_of_fraud_trans, random_state=1)
 not_fraud = inputDataFrame.query('isFraud==0')
-not_fraud= not_fraud.sample(n=40000, random_state=1)
+not_fraud= not_fraud.sample(n=number_of_non_fraud_trans, random_state=1)
 frames = [all_fraud,not_fraud]
 inputDataFrame = pd.concat(frames)
 
