@@ -5,6 +5,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.feature_selection import SelectKBest, mutual_info_regression, RFE
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.svm import SVC # SVM classifier model
+from sklearn.linear_model import LinearRegression, LassoCV
+from sklearn.decomposition import PCA
 
 
 inputDataFrame = pd.read_csv('data.csv')
@@ -30,7 +32,7 @@ inputDataFrame.drop(columns=["type","isFlaggedFraud"], inplace=True)
 #samplying the non fradulent with all fradulent data
 all_fraud = inputDataFrame.query('isFraud==1')
 not_fraud = inputDataFrame.query('isFraud==0')
-not_fraud= not_fraud.sample(n=40000, random_state=1)
+not_fraud= not_fraud.sample(n=4000, random_state=1)
 frames = [all_fraud,not_fraud]
 inputDataFrame = pd.concat(frames)
 
@@ -47,6 +49,15 @@ mi_X_train,mi_X_test = mi_transformer.transform(X_train), mi_transformer.transfo
 for feature, importance in zip(fraud_features.columns, mi_transformer.scores_):
     print(f"The MI score for {feature} is {importance}")
 
+#feature Extraction
+pca_transformer = PCA(n_components=k).fit(X_train)
+pca_X_train = pca_transformer.transform(X_train)
+pca_X_test = pca_transformer.transform(X_test)
+
+#need to add cross validation
+#need to plot data to see if you need a kernel to separate the classes
+#SVM doesnt need huge data set, so must reduce training examples to at least (10 * # features)
+#Add: Regulariztion{Rudge Regression, Lasso, Elastic Net, Group Lasso} or sparistty induction to force the model to use less features
 
 #SVM model
 hyperparams = {
@@ -57,7 +68,7 @@ svc = SVC(gamma='auto')
 clf = GridSearchCV(svc, hyperparams, scoring='accuracy')
 clf.fit(mi_X_train, y_train)
 testScore = clf.score(mi_X_test, y_test)
-print("SVM Accuracy: ", testScore)
+print("SVM + Feature Selection Accuracy: ", testScore)
 optional = False
 if(optional):
   C = 1.0  # SVM regularization parameter
@@ -68,6 +79,11 @@ if(optional):
   models = (clf.fit(X, y) for clf in models)
 
 
+svc2 = SVC(gamma='auto')
+clf2 = GridSearchCV(svc2, hyperparams, scoring='accuracy')
+clf2.fit(mi_X_train, y_train)
+testScore2 = clf2.score(mi_X_test, y_test)
+print("SVM + Feature Extraction= Accuracy: ", testScore2)
 
 
 
