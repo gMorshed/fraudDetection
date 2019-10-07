@@ -42,7 +42,7 @@ inputDataFrame.drop(columns=["isFraud"], inplace=True)
 fraud_features = pd.DataFrame(inputDataFrame)
 X_train, X_test, y_train, y_test = train_test_split(fraud_features, fraud_targets, test_size=0.2, random_state=0)
 #feature selection
-k=5
+k=2
 mi_transformer = SelectKBest(mutual_info_regression,k=k).fit(X_train, y_train)
 mi_X_train,mi_X_test = mi_transformer.transform(X_train), mi_transformer.transform(X_test)
 
@@ -65,10 +65,11 @@ hyperparams = {
     "random_state": [0]
 }
 svc = SVC(gamma='auto')
-clf = GridSearchCV(svc, hyperparams, scoring='accuracy')
+clf = GridSearchCV(svc, hyperparams, scoring='accuracy',cv=5)
 clf.fit(mi_X_train, y_train)
 testScore = clf.score(mi_X_test, y_test)
 print("SVM + Feature Selection Accuracy: ", testScore)
+
 optional = False
 if(optional):
   C = 1.0  # SVM regularization parameter
@@ -80,10 +81,18 @@ if(optional):
 
 
 svc2 = SVC(gamma='auto')
-clf2 = GridSearchCV(svc2, hyperparams, scoring='accuracy')
-clf2.fit(mi_X_train, y_train)
-testScore2 = clf2.score(mi_X_test, y_test)
-print("SVM + Feature Extraction= Accuracy: ", testScore2)
+clf2 = GridSearchCV(svc2, hyperparams, scoring='accuracy', cv=5)
+clf2.fit(pca_X_train, y_train)
+testScore2 = clf2.score(pca_X_test, y_test)
+print("SVM + Feature Extraction Accuracy: ", testScore2)
+
+
+svc3 = SVC(gamma='auto')
+clf3 = GridSearchCV(svc3, hyperparams, scoring='accuracy', cv=5)
+clf3.fit(X_train, y_train)
+testScore3 = clf3.score(X_test, y_test)
+print("SVM with no Feature Selection/Extraction Accuracy: ", testScore3)
+
 
 
 
