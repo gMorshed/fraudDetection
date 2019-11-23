@@ -34,15 +34,22 @@ def profile_upload(request):
     if not csv_file.name.endswith('.csv'):
         messages.error(request, 'THIS IS NOT A CSV FILE')
     data_set = csv_file.read().decode('UTF-8')
-    # setup a stream which is when we loop through each line we are able to handle a data in a stream
-    io_string = io.StringIO(data_set)
-    next(io_string)
-    columns = ['name', 'email', 'address', 'phone', 'profile']
-    rows = []
-    for row in csv.reader(io_string, delimiter=',', quotechar="|"):
-        rows.append(row)
 
-    df = pd.DataFrame(rows, columns=columns, dtype=float)
+    features = []
+    rows = []
+    first_col = True
+    for data in data_set.split('\n'):
+        if first_col:
+            for item in data.split(','):
+                features.append(item)
+            first_col = False
+        else:
+            r = []
+            for item in data.split(','):
+                r.append(item)
+            rows.append(r)
+
+    df = pd.DataFrame(rows, columns=features, dtype=float)
     print(df.head())
 
     context = {}

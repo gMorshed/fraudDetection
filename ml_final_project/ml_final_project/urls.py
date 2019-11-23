@@ -22,5 +22,5 @@ from detect_fraud.views import profile_upload
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('upload-csv/', profile_upload, name="profile_upload"),
+    path('', profile_upload, name="profile_upload"),
 ]
