@@ -7,9 +7,21 @@ from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.svm import SVC # SVM classifier model
 from sklearn.linear_model import LinearRegression, LassoCV
 from sklearn.decomposition import PCA
+from joblib import dump,load
+
+'''
+graphing for linear vs non linear data
+import matplotlib.pyplot as plt
+plt.style.use("ggplot")
+plt.scatter(X_train['amount'], X_train['oldbalanceOrg'], marker='o', c=y_train, s=25, edgecolor='k')
+plt.title("2 classes of data")
+plt.xlabel("X")
+plt.ylabel("Y")
+plt.show()
+'''
 
 
-inputDataFrame = pd.read_csv('data.csv')
+inputDataFrame = pd.read_csv('../data.csv')
 inputDataFrame.dropna(inplace=True)
 assert inputDataFrame.isnull().sum().sum() == 0
 def f(name):
@@ -49,6 +61,18 @@ mi_X_train,mi_X_test = mi_transformer.transform(X_train), mi_transformer.transfo
 for feature, importance in zip(fraud_features.columns, mi_transformer.scores_):
     print(f"The MI score for {feature} is {importance}")
 
+'''
+graphing for linear vs non linear data
+import matplotlib.pyplot as plt
+plt.style.use("ggplot")
+plt.scatter(X_train['amount'], X_train['oldbalanceOrg'], marker='o', c=y_train, s=25, edgecolor='k')
+plt.title("2 classes of data")
+plt.xlabel("X")
+plt.ylabel("Y")
+plt.show()
+'''
+
+
 #feature Extraction
 pca_transformer = PCA(n_components=k).fit(X_train)
 pca_X_train = pca_transformer.transform(X_train)
@@ -62,7 +86,8 @@ pca_X_test = pca_transformer.transform(X_test)
 #SVM model
 hyperparams = {
     "C": [1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1, 1e2, 1e3, 1e4],
-    "random_state": [0]
+    "random_state": [0],
+    'kernel':['linear','rbf','poly']
 }
 svc = SVC(gamma='auto')
 clf = GridSearchCV(svc, hyperparams, scoring='accuracy',cv=5)
@@ -70,31 +95,32 @@ clf.fit(mi_X_train, y_train)
 testScore = clf.score(mi_X_test, y_test)
 print("SVM + Feature Selection Accuracy: ", testScore)
 
-optional = False
-if(optional):
-  C = 1.0  # SVM regularization parameter
-  models = (sk.svm.SVC(kernel='linear', C=C),
-    sk.svm.LinearSVC(C=C),
-    sk.svm.SVC(kernel='rbf', gamma=0.7, C=C),
-    sk.svm.SVC(kernel='poly', degree=3, C=C))
-  models = (clf.fit(X, y) for clf in models)
+# optional = False
+# if(optional):
+#   C = 1.0  # SVM regularization parameter
+#   models = (sk.svm.SVC(kernel='linear', C=C),
+#     sk.svm.LinearSVC(C=C),
+#     sk.svm.SVC(kernel='rbf', gamma=0.7, C=C),
+#     sk.svm.SVC(kernel='poly', degree=3, C=C))
+#   models = (clf.fit(X, y) for clf in models)
 
 
-svc2 = SVC(gamma='auto')
-clf2 = GridSearchCV(svc2, hyperparams, scoring='accuracy', cv=5)
-clf2.fit(pca_X_train, y_train)
-testScore2 = clf2.score(pca_X_test, y_test)
-print("SVM + Feature Extraction Accuracy: ", testScore2)
+# svc2 = SVC(gamma='auto')
+# clf2 = GridSearchCV(svc2, hyperparams, scoring='accuracy', cv=5)
+# clf2.fit(pca_X_train, y_train)
+# testScore2 = clf2.score(pca_X_test, y_test)
+# print("SVM + Feature Extraction Accuracy: ", testScore2)
 
 
-svc3 = SVC(gamma='auto')
-clf3 = GridSearchCV(svc3, hyperparams, scoring='accuracy', cv=5)
-clf3.fit(X_train, y_train)
-testScore3 = clf3.score(X_test, y_test)
-print("SVM with no Feature Selection/Extraction Accuracy: ", testScore3)
+# svc3 = SVC(gamma='auto')
+# clf3 = GridSearchCV(svc3, hyperparams, scoring='accuracy', cv=5)
+# clf3.fit(X_train, y_train)
+# testScore3 = clf3.score(X_test, y_test)
+# print("SVM with no Feature Selection/Extraction Accuracy: ", testScore3)
 
 
-
+#dumping into pickel
+dump(clf, 'svm_feature_selection_with_kernal.joblib')
 
 
 
