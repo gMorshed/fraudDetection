@@ -6,6 +6,23 @@ from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 import pandas as pd
+from joblib import load
+
+
+def classify_fradulent(predict):
+    if predict:
+        return "Fraudulent Transaction"
+    return "Non Fraudulent Transaction"
+
+
+def run_fraud_predict(dataframe):
+    clf = load('../svm_feature_selection_with_kernal.joblib')
+    result_list = []
+    for index, row in dataframe.iterrows():
+        result_list.append(clf.predict(row))
+    dataframe.insert(9, "fraud", result_list, True)
+    dataframe["Is_fraud"] = dataframe["fraud"].apply(func=classify_fradulent)
+    return dataframe
 
 
 # Create your views here.
@@ -13,7 +30,7 @@ import pandas as pd
 def profile_upload(request):
     expected_features = ['step', 'type', 'amount', 'nameOrig', 'oldbalanceOrg', 'newbalanceOrig', 'nameDest',
                          'oldbalanceDest',
-                         'newbalanceDest', 'isFraud', 'isFlaggedFraud']
+                         'newbalanceDest']
     # declaring template
     template = "profile_upload.html"
     # GET request returns the value of the data with the specified key.
@@ -55,7 +72,14 @@ def profile_upload(request):
             return render(request, template)
 
     df = pd.DataFrame(rows, columns=features, dtype=float)
-    print(df.head())
 
-    context = {}
-    return HttpResponse("Dataframe looks good. Let's do machine learning.")
+    # render dataframe as html
+    result_df = run_fraud_predict(df)
+
+    html = result_df.to_html()
+
+    # write html to file
+    text_file = open("templates/index.html", "w")
+    text_file.write(html)
+    text_file.close()
+    return render(request, 'index.html')
