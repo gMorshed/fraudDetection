@@ -52,6 +52,8 @@ def getNewLabel(oldLabel):
 df["class"] = df["class"].apply(func=getNewLabel)
 print(df.head())
 
+df.to_csv("./german_data.csv")
+
 # Split test train
 fraud_targets = pd.Series(df["class"])
 df.drop(columns=["class"], inplace=True)
