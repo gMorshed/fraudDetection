@@ -17,10 +17,9 @@ def classify_fradulent(predict):
 
 def run_fraud_predict(dataframe):
     clf = load('../svm_feature_selection_with_kernal.joblib')
-    result_list = []
-    for index, row in dataframe.iterrows():
-        result_list.append(clf.predict(row))
-    dataframe.insert(9, "fraud", result_list, True)
+    prediction_list = clf.predict(dataframe.to_numpy())
+    dataframe.insert(5, "fraud", prediction_list, True)
+    # dataframe.drop(columns=['fraud'], inplace=True)
     dataframe["Is_fraud"] = dataframe["fraud"].apply(func=classify_fradulent)
     return dataframe
 
@@ -28,9 +27,8 @@ def run_fraud_predict(dataframe):
 # Create your views here.
 # one parameter named request
 def profile_upload(request):
-    expected_features = ['step', 'type', 'amount', 'nameOrig', 'oldbalanceOrg', 'newbalanceOrig', 'nameDest',
-                         'oldbalanceDest',
-                         'newbalanceDest']
+    expected_features = ['step', 'TRANSFER', 'PAYMENT', 'DEBIT', 'CASH_OUT', 'CASH_IN', 'amount', 'oldbalanceOrg',
+                         'newbalanceOrig', 'oldbalanceDest', 'newbalanceDest', 'isMerchantOrig', 'isMerchantDest']
     # declaring template
     template = "profile_upload.html"
     # GET request returns the value of the data with the specified key.
@@ -72,7 +70,7 @@ def profile_upload(request):
             return render(request, template)
 
     df = pd.DataFrame(rows, columns=features, dtype=float)
-
+    df = df.dropna()
     # render dataframe as html
     result_df = run_fraud_predict(df)
 
