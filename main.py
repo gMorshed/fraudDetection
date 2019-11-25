@@ -21,14 +21,14 @@ def f(name):
     return 1
   else:
     return NaN
-  
-  
+
+
 inputDataFrame["isMerchantOrig"] = inputDataFrame["nameOrig"].apply(func=f)
 inputDataFrame["isMerchantDest"] = inputDataFrame["nameDest"].apply(func=f)
 inputDataFrame.drop(columns=["nameOrig","nameDest"], inplace=True)
 new_inputDataFrame = pd.get_dummies(data=inputDataFrame["type"])
 for item in new_inputDataFrame:
-  inputDataFrame.insert(2, item,new_inputDataFrame[item]) 
+  inputDataFrame.insert(2, item,new_inputDataFrame[item])
 inputDataFrame.drop(columns=["type","isFlaggedFraud"], inplace=True)
 
 #samplying the non fradulent with all fradulent data
@@ -38,7 +38,7 @@ not_fraud= not_fraud.sample(n=4000, random_state=1)
 frames = [all_fraud,not_fraud]
 inputDataFrame = pd.concat(frames)
 
-#split test train 
+#split test train
 fraud_targets = pd.Series(inputDataFrame["isFraud"])
 inputDataFrame.drop(columns=["isFraud"], inplace=True)
 fraud_features = pd.DataFrame(inputDataFrame)
@@ -124,10 +124,3 @@ print(clf.predict(mi_X_test[0:11]))
 
 #dumping into pickel
 dump(clf, 'svm_feature_selection_with_kernal.joblib')
-
-
-
-
-
-
-
