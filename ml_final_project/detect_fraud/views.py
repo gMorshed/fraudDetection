@@ -16,7 +16,7 @@ def classify_fradulent(predict):
 
 
 def run_fraud_predict(dataframe):
-    clf = load('../svm_feature_selection_with_kernal.joblib')
+    clf = load('../random_forest_w_feature_selection.joblib')
     prediction_list = clf.predict(dataframe.to_numpy())
     dataframe.insert(5, "fraud", prediction_list, True)
     # dataframe.drop(columns=['fraud'], inplace=True)
