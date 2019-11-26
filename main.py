@@ -1,126 +1,140 @@
+import tensorflow as tf
+import tensorflow.keras as keras
+from tensorflow.keras.datasets import mnist
+from tensorflow.keras.layers import Dense, Flatten, BatchNormalization, Reshape, Input
+from tensorflow.keras import Model, Sequential
 import pandas as pd
-import numpy as np
-import io
 from sklearn.model_selection import train_test_split
-from sklearn.feature_selection import SelectKBest, mutual_info_regression, RFE
-from sklearn.model_selection import train_test_split, GridSearchCV
-from sklearn.svm import SVC # SVM classifier model
-from sklearn.linear_model import LinearRegression, LassoCV
-from sklearn.decomposition import PCA
-from joblib import dump,load
 
-
-
-inputDataFrame = pd.read_csv('../data.csv')
-inputDataFrame.dropna(inplace=True)
-assert inputDataFrame.isnull().sum().sum() == 0
-def f(name):
-  if(name[0] == "C"):
-    return 0
-  elif(name[0]=="M"):
-    return 1
-  else:
-    return NaN
-
-
-inputDataFrame["isMerchantOrig"] = inputDataFrame["nameOrig"].apply(func=f)
-inputDataFrame["isMerchantDest"] = inputDataFrame["nameDest"].apply(func=f)
-inputDataFrame.drop(columns=["nameOrig","nameDest"], inplace=True)
-new_inputDataFrame = pd.get_dummies(data=inputDataFrame["type"])
-for item in new_inputDataFrame:
-  inputDataFrame.insert(2, item,new_inputDataFrame[item])
-inputDataFrame.drop(columns=["type","isFlaggedFraud"], inplace=True)
-
-#samplying the non fradulent with all fradulent data
-all_fraud = inputDataFrame.query('isFraud==1')
-not_fraud = inputDataFrame.query('isFraud==0')
-not_fraud= not_fraud.sample(n=4000, random_state=1)
-frames = [all_fraud,not_fraud]
-inputDataFrame = pd.concat(frames)
-
-#split test train
-fraud_targets = pd.Series(inputDataFrame["isFraud"])
-inputDataFrame.drop(columns=["isFraud"], inplace=True)
-fraud_features = pd.DataFrame(inputDataFrame)
-X_train, X_test, y_train, y_test = train_test_split(fraud_features, fraud_targets, test_size=0.2, random_state=0)
-
-
-
-
-#feature selection
-k=5
-mi_transformer = SelectKBest(mutual_info_regression,k=k).fit(X_train, y_train)
-mi_X_train,mi_X_test = mi_transformer.transform(X_train), mi_transformer.transform(X_test)
-
-#code to make the test transection for the API
-# import sys
-# dataset = pd.DataFrame({'step': mi_X_test[:, 0], 'amount': mi_X_test[:, 1], 'oldbalanceOrg': mi_X_test[:, 2], 'newbalanceOrig': mi_X_test[:, 3], 'isMerchantDest': mi_X_test[:, 4]})
-# dataset.drop(columns=['step'], inplace=True)
-# dataset.head(10).to_csv('transection_to_test_w.csv', sep=',', encoding='utf-8',index=False)
-# sys.exit()
-
-for feature, importance in zip(fraud_features.columns, mi_transformer.scores_):
-    print(f"The MI score for {feature} is {importance}")
-
-
-
-'''
-graphing for linear vs non linear data
+import numpy as np
+np.random.seed(0)
+import matplotlib
 import matplotlib.pyplot as plt
-plt.style.use("ggplot")
-plt.scatter(X_train['amount'], X_train['oldbalanceOrg'], marker='o', c=y_train, s=25, edgecolor='k')
-plt.title("2 classes of data")
-plt.xlabel("X")
-plt.ylabel("Y")
-plt.show()
-'''
 
+inputDataFrame = pd.read_csv('./german_data.csv')
 
-#feature Extraction
-# pca_transformer = PCA(n_components=k).fit(X_train)
-# pca_X_train = pca_transformer.transform(X_train)
-# pca_X_test = pca_transformer.transform(X_test)
+# Split test train
+fraud_targets = pd.Series(inputDataFrame["class"])
+inputDataFrame.drop(columns=["class"], inplace=True)
+fraud_features = pd.DataFrame(inputDataFrame)
+x_train, x_test, y_train, y_test = train_test_split(fraud_features, fraud_targets, test_size=0.2, random_state=0)
+x_train = x_train.to_numpy()
+x_test = x_test.to_numpy()
+y_train = y_train.to_numpy()
+y_test = y_test.to_numpy()
 
-#need to add cross validation
-#need to plot data to see if you need a kernel to separate the classes
-#SVM doesnt need huge data set, so must reduce training examples to at least (10 * # features)
-#Add: Regulariztion{Rudge Regression, Lasso, Elastic Net, Group Lasso} or sparistty induction to force the model to use less features
+# Code taken from the GAN in class exercise
+img_shape = x_train[0].shape
+latent_dim = 100 # This is the dimension of the random noise we'll use for the generator
+batch_size = 128
+epochs = 400
 
-#SVM model
-hyperparams = {
-    "C": [1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1, 1e2, 1e3, 1e4],
-    "random_state": [0]
-}
-svc = SVC(gamma='auto')
-clf = GridSearchCV(svc, hyperparams, scoring='accuracy',cv=5)
-clf.fit(mi_X_train, y_train)
-# testScore = clf.score(mi_X_test, y_test)
-# print("SVM + Feature Selection Accuracy: ", testScore)
-print(clf.predict(mi_X_test[0:11]))
+# Create generator_layers which are the layers for the generator model
+# The generator model should have 3 dense layers of 256, 512, and 1024 units respectively
+# After each Dense layer apply a BatchNormalization with a momentum value between 0.7 and 0.9
+# Finalize the layers with a final output layer followed by a Reshape layer to get it to the right size
 
-# optional = False
-# if(optional):
-#   C = 1.0  # SVM regularization parameter
-#   models = (sk.svm.SVC(kernel='linear', C=C),
-#     sk.svm.LinearSVC(C=C),
-#     sk.svm.SVC(kernel='rbf', gamma=0.7, C=C),
-#     sk.svm.SVC(kernel='poly', degree=3, C=C))
-#   models = (clf.fit(X, y) for clf in models)
+# Think about what the input to the generator is and what the output should be
 
+generator_layers = [Dense(256, input_shape=(latent_dim,), activation="relu"), BatchNormalization(momentum=0.8),
+                    Dense(512, activation="relu"), BatchNormalization(momentum=0.8),
+                    Dense(1024, activation="relu"), BatchNormalization(momentum=0.8),
+                    Dense(img_shape[0])]
 
-# svc2 = SVC(gamma='auto')
-# clf2 = GridSearchCV(svc2, hyperparams, scoring='accuracy', cv=5)
-# clf2.fit(pca_X_train, y_train)
-# testScore2 = clf2.score(pca_X_test, y_test)
-# print("SVM + Feature Extraction Accuracy: ", testScore2)
+generator = Sequential(generator_layers)
 
+# Create discriminator_layers which are the layers for the discriminator model
+# The discriminator model should have 2 Dense layers with 512, 256 units respectively
+# Add the appropriate output layer and activation function
 
-# svc3 = SVC(gamma='auto')
-# clf3 = GridSearchCV(svc3, hyperparams, scoring='accuracy', cv=5)
-# clf3.fit(X_train, y_train)
-# testScore3 = clf3.score(X_test, y_test)
-# print("SVM with no Feature Selection/Extraction Accuracy: ", testScore3)
+# Think about what the input and output for a discriminator model would be
 
+discriminator_layers = [Flatten(input_shape=img_shape), Dense(512, activation="relu"),
+                        Dense(256, activation="relu"), Dense(1, activation="sigmoid")]
 
-#dumping into pickel
-dump(clf, 'svm_feature_selection_with_kernal.joblib')
+discriminator = Sequential(discriminator_layers)
+# discriminator.summary()
+
+discriminator.compile(loss='binary_crossentropy',optimizer="adam", metrics=['accuracy'])
+
+# The generator takes noise as input and generates imgs
+z = Input(shape=(latent_dim,))
+img = generator(z)
+
+# For the combined model we will only train the generator
+discriminator.trainable = False
+
+# The discriminator takes generated images as input and determines validity
+validity = discriminator(img)
+
+combined = Model(z, validity)
+combined.compile(loss='binary_crossentropy', optimizer="adam")
+
+# Rescale -1 to 1
+# x_train = x_train / 127.5 - 1.
+# x_train = np.expand_dims(x_train, axis=3)
+
+# Adversarial ground truths
+valid = np.ones((batch_size, 1))
+fake = np.zeros((batch_size, 1))
+
+for epoch in range(epochs):
+
+    # ---------------------
+    #  Train Discriminator
+    # ---------------------
+
+    # Select a random batch of images
+    idx = np.random.randint(0, x_train.shape[0], batch_size)
+    imgs = x_train[idx]
+
+    noise = np.random.normal(0, 1, (batch_size, latent_dim))
+
+    # Generate a batch of new images
+    gen_imgs = generator.predict(noise)
+
+    # Train the discriminator
+    discriminator.trainable = True
+    discriminator.compile(loss='binary_crossentropy',optimizer="adam", metrics=['accuracy'])
+    d_loss_real = discriminator.train_on_batch(imgs, valid)
+    discriminator.compile(loss='binary_crossentropy',optimizer="adam", metrics=['accuracy'])
+    d_loss_fake = discriminator.train_on_batch(gen_imgs, fake)
+    d_loss = 0.5 * np.add(d_loss_real, d_loss_fake)
+
+    # ---------------------
+    #  Train Generator
+    # ---------------------
+
+    noise = np.random.normal(0, 1, (batch_size, latent_dim))
+
+    # Train the generator (to have the discriminator label samples as valid)
+    discriminator.trainable = False
+    g_loss = combined.train_on_batch(noise, valid)
+
+    if epoch % 20 == 0:
+        print("Loss: " + str(g_loss))
+        # r, c = 5,5
+        # noise = np.random.normal(0, 1, (r*c, latent_dim))
+        # gen_imgs = generator.predict(noise)
+
+        # Rescale images 0 - 1
+        # gen_imgs = 0.5 * gen_imgs + 0.5
+        #
+        # fig, axs = plt.subplots(r, c)
+        #
+        # cnt = 0
+        # for i in range(r):
+        #     for j in range(c):
+        #         axs[i,j].imshow(gen_imgs[cnt], cmap='gray')
+        #         axs[i,j].axis('off')
+        #         cnt += 1
+        # fig.suptitle(f"Epoch: {epoch+1}")
+        # plt.show()
+
+# Generate another "digit"
+# noise = np.random.normal(0, 1, (1, latent_dim))
+# gen_img = generator.predict(noise)[0]
+# plt.imshow(gen_img, cmap='gray')
+# plt.show()
+
+generator.save("german_generator2.h5")
