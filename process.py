@@ -50,9 +50,19 @@ def getNewLabel(oldLabel):
         return 1
 
 df["class"] = df["class"].apply(func=getNewLabel)
-print(df.head())
+# print(df.head())
 
 df.to_csv("./german_data.csv")
+
+df2 = df.rename(columns={"class": "isFraud"})
+all_fraud = df2.query('isFraud==1')
+all_fraud= all_fraud.sample(n=5, random_state=1)
+not_fraud = df2.query('isFraud==0')
+not_fraud= not_fraud.sample(n=5, random_state=1)
+frames = [all_fraud,not_fraud]
+inputDataFrame = pd.concat(frames)
+
+inputDataFrame.to_csv("./german_data_test_transec_w_ground_truth.csv")
 
 # Split test train
 fraud_targets = pd.Series(df["class"])
