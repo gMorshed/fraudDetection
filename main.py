@@ -7,6 +7,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import GridSearchCV
 
+'''
 number_of_fraud_trans = 86
 number_of_non_fraud_trans = 49914
 
@@ -79,3 +80,19 @@ print("Best parameter with selected features: ",clf_w_selected_features.best_par
 predictions = clf_w_selected_features.predict(mi_X_test)
 conf_mat = confusion_matrix(y_test, predictions)
 print("Confusion Matrix with selected features ",conf_mat)
+
+'''
+
+#new stuff
+from joblib import dump,load
+# dump(clf_w_allFeatures, 'random_forest_w_all_feature.joblib')
+clf_w_allFeatures = load('random_forest_w_all_feature.joblib')
+testing_w_10_transection = pd.read_csv('transection_to_test_w_ground_truth.csv')
+testing_w_10_transection.rename(columns={"isFraud": "isFraud_ground_truth"}, inplace=True)
+print(testing_w_10_transection)
+holding_ground_truth = testing_w_10_transection['isFraud_ground_truth']
+testing_w_10_transection.drop(columns=["isFraud_ground_truth"], inplace=True)
+predict_list = clf_w_allFeatures.predict(testing_w_10_transection)
+testing_w_10_transection= testing_w_10_transection.join(holding_ground_truth)
+testing_w_10_transection.insert(13, "fraud_prediction", predict_list, True)
+print(testing_w_10_transection)
