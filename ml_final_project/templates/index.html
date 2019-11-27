@@ -3,113 +3,201 @@
     <tr style="text-align: right;">
       <th></th>
       <th>step</th>
+      <th>TRANSFER</th>
+      <th>PAYMENT</th>
+      <th>DEBIT</th>
+      <th>CASH_OUT</th>
+      <th>CASH_IN</th>
+      <th>fraud_prediction</th>
       <th>amount</th>
       <th>oldbalanceOrg</th>
       <th>newbalanceOrig</th>
+      <th>oldbalanceDest</th>
+      <th>newbalanceDest</th>
+      <th>isMerchantOrig</th>
       <th>isMerchantDest</th>
-      <th>fraud</th>
-      <th>Is_fraud</th>
+      <th>isFraud_ground_truth</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <th>0</th>
-      <td>155.0</td>
-      <td>1477.63</td>
-      <td>40667.00</td>
-      <td>39189.37</td>
+      <td>7</td>
       <td>1.0</td>
-      <td>0</td>
-      <td>Non Fraudulent Transaction</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>Fraudulent Transaction</td>
+      <td>21571.00</td>
+      <td>21571.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>Fraudulent Transaction</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>284.0</td>
-      <td>498747.55</td>
-      <td>498747.55</td>
+      <td>275</td>
+      <td>1.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>Fraudulent Transaction</td>
+      <td>21323.28</td>
+      <td>21323.28</td>
+      <td>0.00</td>
+      <td>0.00</td>
       <td>0.00</td>
       <td>0.0</td>
-      <td>0</td>
-      <td>Non Fraudulent Transaction</td>
+      <td>0.0</td>
+      <td>Fraudulent Transaction</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>358.0</td>
-      <td>69674.16</td>
-      <td>118724.00</td>
-      <td>188398.16</td>
+      <td>187</td>
       <td>0.0</td>
-      <td>0</td>
-      <td>Non Fraudulent Transaction</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>0.0</td>
+      <td>Fraudulent Transaction</td>
+      <td>2044841.02</td>
+      <td>2044841.02</td>
+      <td>0.00</td>
+      <td>397169.10</td>
+      <td>2442010.12</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>Fraudulent Transaction</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>568.0</td>
-      <td>32521.24</td>
-      <td>32521.24</td>
-      <td>0.00</td>
+      <td>365</td>
       <td>0.0</td>
-      <td>0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>0.0</td>
       <td>Non Fraudulent Transaction</td>
+      <td>916644.03</td>
+      <td>916644.03</td>
+      <td>0.00</td>
+      <td>2026.90</td>
+      <td>918670.94</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>Fraudulent Transaction</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>163.0</td>
-      <td>140.80</td>
-      <td>15719.00</td>
-      <td>15578.20</td>
+      <td>661</td>
       <td>1.0</td>
-      <td>0</td>
-      <td>Non Fraudulent Transaction</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>Fraudulent Transaction</td>
+      <td>10000000.00</td>
+      <td>12140888.35</td>
+      <td>2140888.35</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>Fraudulent Transaction</td>
     </tr>
     <tr>
       <th>5</th>
-      <td>311.0</td>
-      <td>6558087.93</td>
-      <td>6558087.93</td>
+      <td>159</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>Non Fraudulent Transaction</td>
+      <td>290448.64</td>
+      <td>49671.00</td>
+      <td>340119.64</td>
+      <td>34047.63</td>
       <td>0.00</td>
       <td>0.0</td>
-      <td>0</td>
+      <td>0.0</td>
       <td>Non Fraudulent Transaction</td>
     </tr>
     <tr>
       <th>6</th>
-      <td>639.0</td>
-      <td>49199.20</td>
-      <td>49199.20</td>
+      <td>19</td>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>Non Fraudulent Transaction</td>
+      <td>7521.26</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
       <td>0.00</td>
       <td>0.0</td>
-      <td>0</td>
+      <td>1.0</td>
       <td>Non Fraudulent Transaction</td>
     </tr>
     <tr>
       <th>7</th>
-      <td>101.0</td>
-      <td>253793.28</td>
-      <td>253793.28</td>
+      <td>210</td>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>Non Fraudulent Transaction</td>
+      <td>12043.69</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
       <td>0.00</td>
       <td>0.0</td>
-      <td>0</td>
+      <td>1.0</td>
       <td>Non Fraudulent Transaction</td>
     </tr>
     <tr>
       <th>8</th>
-      <td>186.0</td>
-      <td>2728.37</td>
-      <td>0.00</td>
-      <td>0.00</td>
+      <td>357</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
       <td>1.0</td>
-      <td>0</td>
+      <td>Non Fraudulent Transaction</td>
+      <td>120116.21</td>
+      <td>97688.68</td>
+      <td>217804.90</td>
+      <td>849069.38</td>
+      <td>728953.17</td>
+      <td>0.0</td>
+      <td>0.0</td>
       <td>Non Fraudulent Transaction</td>
     </tr>
     <tr>
       <th>9</th>
-      <td>42.0</td>
-      <td>192358.10</td>
-      <td>10214.00</td>
-      <td>202572.10</td>
+      <td>211</td>
       <td>0.0</td>
-      <td>0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>0.0</td>
+      <td>Non Fraudulent Transaction</td>
+      <td>115161.12</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>576802.51</td>
+      <td>691963.63</td>
+      <td>0.0</td>
+      <td>0.0</td>
       <td>Non Fraudulent Transaction</td>
     </tr>
   </tbody>

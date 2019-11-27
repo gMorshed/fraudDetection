@@ -16,11 +16,15 @@ def classify_fradulent(predict):
 
 
 def run_fraud_predict(dataframe):
-    clf = load('../random_forest_w_feature_selection.joblib')
+    clf = load('../random_forest_w_all_feature.joblib')
+    dataframe.rename(columns={"isFraud": "isFraud_ground_truth"}, inplace=True)
+    holding_ground_truth = dataframe['isFraud_ground_truth']
+    dataframe.drop(columns=["isFraud_ground_truth"], inplace=True)
     prediction_list = clf.predict(dataframe.to_numpy())
-    dataframe.insert(5, "fraud", prediction_list, True)
-    # dataframe.drop(columns=['fraud'], inplace=True)
-    dataframe["Is_fraud"] = dataframe["fraud"].apply(func=classify_fradulent)
+    dataframe = dataframe.join(holding_ground_truth)
+    dataframe.insert(6, "fraud_prediction", prediction_list, True)
+    dataframe["fraud_prediction"] = dataframe["fraud_prediction"].apply(func=classify_fradulent)
+    dataframe["isFraud_ground_truth"] = dataframe["isFraud_ground_truth"].apply(func=classify_fradulent)
     return dataframe
 
 
@@ -28,7 +32,7 @@ def run_fraud_predict(dataframe):
 # one parameter named request
 def profile_upload(request):
     expected_features = ['step', 'TRANSFER', 'PAYMENT', 'DEBIT', 'CASH_OUT', 'CASH_IN', 'amount', 'oldbalanceOrg',
-                         'newbalanceOrig', 'oldbalanceDest', 'newbalanceDest', 'isMerchantOrig', 'isMerchantDest']
+                         'newbalanceOrig', 'oldbalanceDest', 'newbalanceDest', 'isMerchantOrig', 'isMerchantDest','isFraud']
     # declaring template
     template = "profile_upload.html"
     # GET request returns the value of the data with the specified key.
