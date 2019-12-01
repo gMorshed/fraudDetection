@@ -1,4 +1,8 @@
 <h2 style="text-align: center">Here is our prediction about your transactions</h2>
+{% if model_name %}
+<h2 style="text-align: center">Using
+        {{ model_name }}
+        {% endif %}</h2>
 {% include 'table.html' %}
 <h2 style="text-align: center">Confusion matrix simplified</h2>
 {% if matrix_result %}

@@ -18,11 +18,11 @@ def classify_fradulent(predict):
 
 def run_fraud_predict(dataframe, model):
     clf = None
-    if model == "random":
+    if model == "Random forest":
         clf = load('../random_forest_w_all_feature.joblib')
-    elif model == "svm":
-        clf = load('../svm_feature_selection_with_kernal.joblib')
-    elif model == "som":
+    elif model == "SVM":
+        clf = load('../svm_all_feature_with_kernal.joblib')
+    elif model == "Self Organizing Map":
         clf = load('../random_forest_w_all_feature.joblib')
     else:
         clf = load('../random_forest_w_all_feature.joblib')
@@ -107,4 +107,4 @@ def profile_upload(request):
     text_file.write(html)
     text_file.close()
 
-    return render(request, 'result.html', {'matrix_result': confusion_matrix_simplify})
+    return render(request, 'result.html', {'matrix_result': confusion_matrix_simplify, 'model_name': model})
