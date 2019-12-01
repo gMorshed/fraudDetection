@@ -1,12 +1,15 @@
 # Create your views here.
 import csv
 import io
+import pickle
 
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 import pandas as pd
 from joblib import load
+import numpy as np
+import minisom
 from sklearn.metrics import classification_report, confusion_matrix
 
 
@@ -15,6 +18,22 @@ def classify_fradulent(predict):
         return "Fraudulent Transaction"
     return "Non Fraudulent Transaction"
 
+def classify(som, data, class_assignments):
+    """Classifies each sample in data in one of the classes definited
+    using the method labels_map.
+    Returns a list of the same length of data where the i-th element
+    is the class assigned to data[i].
+    """
+    winmap = class_assignments
+    default_class = np.sum(list(winmap.values())).most_common()[0][0]
+    result = []
+    for d in data:
+        win_position = som.winner(d)
+        if win_position in winmap:
+            result.append(winmap[win_position].most_common()[0][0])
+        else:
+            result.append(default_class)
+    return result
 
 def run_fraud_predict(dataframe, model):
     clf = None
@@ -23,7 +42,25 @@ def run_fraud_predict(dataframe, model):
     elif model == "SVM":
         clf = load('../svm_all_feature_with_kernal.joblib')
     elif model == "Self Organizing Map":
-        clf = load('../random_forest_w_all_feature.joblib')
+        som = pickle.load(open("../synthetic_som.p", "rb"))
+        X_train = pickle.load(open("../X_train.p", "rb"))
+        y_train = pickle.load(open("../y_train.p", "rb"))
+        dataframe.rename(columns={"isFraud": "isFraud_ground_truth"}, inplace=True)
+        holding_ground_truth = dataframe['isFraud_ground_truth']
+        dataframe.drop(columns=["isFraud_ground_truth"], inplace=True)
+        class_assignments = som.labels_map(X_train, y_train)
+        prediction_list = classify(som, dataframe.values.tolist(), class_assignments)
+        dataframe = dataframe.join(holding_ground_truth)
+        dataframe.insert(14, "fraud_prediction", prediction_list, True)
+        tn, fp, fn, tp = confusion_matrix(dataframe['isFraud_ground_truth'].to_numpy(), prediction_list).ravel()
+        confusion_matrix_simplify = ["True Negative: " + str(tn), "False Positive: " + str(fp),
+                                     "False Negative: " + str(fn), "True Positive: " + str(tp)]
+
+        report = classification_report(dataframe['isFraud_ground_truth'].to_numpy(), prediction_list,
+                                       target_names=['Non-fraud', 'Fraud'], output_dict=True)
+        dataframe["fraud_prediction"] = dataframe["fraud_prediction"].apply(func=classify_fradulent)
+        dataframe["isFraud_ground_truth"] = dataframe["isFraud_ground_truth"].apply(func=classify_fradulent)
+        return dataframe, confusion_matrix_simplify, report
     else:
         clf = load('../random_forest_w_all_feature.joblib')
     dataframe.rename(columns={"isFraud": "isFraud_ground_truth"}, inplace=True)
@@ -37,7 +74,7 @@ def run_fraud_predict(dataframe, model):
                                  "False Negative: " + str(fn), "True Positive: " + str(tp)]
 
     report = classification_report(dataframe['isFraud_ground_truth'].to_numpy(), prediction_list,
-                                   target_names=['Non-fraud', 'Fraud'],output_dict=True)
+                                   target_names=['Non-fraud', 'Fraud'], output_dict=True)
     dataframe["fraud_prediction"] = dataframe["fraud_prediction"].apply(func=classify_fradulent)
     dataframe["isFraud_ground_truth"] = dataframe["isFraud_ground_truth"].apply(func=classify_fradulent)
     return dataframe, confusion_matrix_simplify, report
@@ -89,7 +126,7 @@ def profile_upload(request):
             messages.error(request, 'It should contain these columns: %s' % expected_features)
             return render(request, template)
 
-    model  = request.POST['model']
+    model = request.POST['model']
     df = pd.DataFrame(rows, columns=features, dtype=float)
     df = df.dropna()
     # render dataframe as html
