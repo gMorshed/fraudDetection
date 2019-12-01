@@ -7,6 +7,9 @@
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 </head>
 <body>
+<h1 style="text-align: center">We are group Terminators!</h1>
+<h1 style="text-align: center">We detect fraud transactions!</h1>
+
 {% if messages %}
         {% for message in messages %}
             <div>
@@ -16,7 +19,7 @@
         {% endfor %}
 {% endif %}
 
-<form action="" method="POST" enctype="multipart/form-data" class="form-horizontal">
+<form style="margin-left: 20%" action="" method="POST" enctype="multipart/form-data" class="form-horizontal">
 {% csrf_token %}
 <div class="form-group">
     <label for="name" class="col-md-3 col-sm-3 col-xs-12 control-label">File: </label>
@@ -24,11 +27,18 @@
         <input type="file" name="csv_file" id="csv_file" required="True" class="form-control">
     </div>
 </div>
+    <h2>Select Machine Learning model</h2>
+        <select name="model">
+        <option value="svm">Support vector machine</option>
+        <option value="random">Random Forest</option>
+        <option value="som">Self Organizing Map</option>
+    </select><br><br>
 <div class="form-group">
     <div class="col-md-3 col-sm-3 col-xs-12 col-md-offset-3" style="margin-bottom:10px;">
          <button class="btn btn-primary"> <span class="glyphicon glyphicon-upload" style="margin-right:5px;"></span>Upload </button>
     </div>
 </div>
+
 </form>
 </body>
 </html>
