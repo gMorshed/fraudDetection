@@ -68,8 +68,8 @@ class_assignments = som.labels_map(X_train, y_train)
 print(sklearn.metrics.classification_report(y_test, classify(som, X_test, class_assignments)))
 
 # saving the som in the file som.p
-with open('synthetic_som.p', 'wb') as outfile:
-    pickle.dump(som, outfile)
+# with open('synthetic_som.p', 'wb') as outfile:
+#     pickle.dump(som, outfile)
 
 #feature selection
 # k=5
