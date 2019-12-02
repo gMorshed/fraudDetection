@@ -2,8 +2,6 @@ Django==2.2.5
 django-crispy-forms==1.7.2
 joblib==0.14.0
 numpy==1.17.2
-opencv-contrib-python==3.2.0.7
-opencv-python==3.2.0.7
 pandas==0.25.1
 python-dateutil==2.8.0
 pytz==2019.2
