@@ -13,9 +13,7 @@ from sklearn.feature_selection import SelectKBest, mutual_info_regression, RFE
 
 # ******************** Train on synthetic dataset ******************************
 inputDataFrame = pd.read_csv('./data.csv')
-print(inputDataFrame.head())
 inputDataFrame.drop(columns=["Unnamed: 0"], inplace=True)
-print(inputDataFrame.head())
 
 #split test train
 fraud_targets = pd.Series(inputDataFrame["isFraud"])
@@ -23,16 +21,8 @@ inputDataFrame.drop(columns=["isFraud"], inplace=True)
 fraud_features = pd.DataFrame(inputDataFrame)
 X_train, X_test, y_train, y_test = train_test_split(fraud_features, fraud_targets, test_size=0.2, random_state=0)
 
-print(type(X_train))
-print(type(X_test))
-print(type(y_train))
-print(type(y_test))
-
 X_train = X_train.values.tolist()
 X_test = X_test.values.tolist()
-
-print(X_train[0])
-print(X_test[0])
 
 # just a heuristic for x and y as it needs to be constant to tune the other hyperparameters
 x = int(np.sqrt(5 * np.sqrt(fraud_features.shape[0])))
@@ -67,14 +57,17 @@ def som_quantization_error(space):
     return {'loss': error, 'status': STATUS_OK}
 
 # hyperparameter tuning to obtain sigma and learning rate
-trials = Trials()
-best = fmin(fn=som_quantization_error, space=space, algo=tpe.suggest, max_evals=100, trials=trials)
-print(best)
+# trials = Trials()
+# best = fmin(fn=som_quantization_error, space=space, algo=tpe.suggest, max_evals=100, trials=trials)
+# print(best)
 
-som = ms.MiniSom(x=x, y=y, input_len=input_len, sigma=8.007684739287342, learning_rate=4.486348532872689)
+som = ms.MiniSom(x=x, y=y, input_len=input_len, sigma=13.50128676401156, learning_rate=4.586157932103149)
 som.pca_weights_init(X_train)
 som.train_batch(X_train, 100)
 class_assignments = som.labels_map(X_train, y_train)
+
+with open('class_assignments.p', 'wb') as outfile:
+    pickle.dump(class_assignments, outfile)
 
 print(sklearn.metrics.classification_report(y_test, classify(som, X_test, class_assignments)))
 
