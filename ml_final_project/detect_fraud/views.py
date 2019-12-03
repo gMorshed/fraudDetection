@@ -18,6 +18,7 @@ def classify_fradulent(predict):
         return "Fraudulent Transaction"
     return "Non Fraudulent Transaction"
 
+
 def classify(som, data, class_assignments):
     """Classifies each sample in data in one of the classes definited
     using the method labels_map.
@@ -35,6 +36,7 @@ def classify(som, data, class_assignments):
             result.append(default_class)
     return result
 
+
 def run_fraud_predict(dataframe, model):
     clf = None
     if model == "Random forest":
@@ -43,13 +45,21 @@ def run_fraud_predict(dataframe, model):
         clf = load('../svm_all_feature_with_kernal.joblib')
     elif model == "Self Organizing Map":
         som = pickle.load(open("../synthetic_som.p", "rb"))
-        X_train = pickle.load(open("../X_train.p", "rb"))
-        y_train = pickle.load(open("../y_train.p", "rb"))
         dataframe.rename(columns={"isFraud": "isFraud_ground_truth"}, inplace=True)
         holding_ground_truth = dataframe['isFraud_ground_truth']
         dataframe.drop(columns=["isFraud_ground_truth"], inplace=True)
-        class_assignments = som.labels_map(X_train, y_train)
-        prediction_list = classify(som, dataframe.values.tolist(), class_assignments)
+        X_test_final = dataframe.to_numpy().tolist()
+        X_test = []
+        for l in X_test_final:
+            dummy_list = []
+            for i in l:
+                dummy_list.append(float(i))
+            X_test.append(dummy_list)
+
+        print(type(X_test))
+        print(X_test[0])
+        class_assignments = pickle.load(open("../class_assignments.p", "rb"))
+        prediction_list = classify(som, X_test, class_assignments)
         dataframe = dataframe.join(holding_ground_truth)
         dataframe.insert(14, "fraud_prediction", prediction_list, True)
         tn, fp, fn, tp = confusion_matrix(dataframe['isFraud_ground_truth'].to_numpy(), prediction_list).ravel()
