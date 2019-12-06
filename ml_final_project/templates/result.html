@@ -4,17 +4,6 @@
         {{ model_name }}
         {% endif %}</h2>
 {% include 'table.html' %}
-<h2 style="text-align: center">Confusion matrix simplified</h2>
-{% if matrix_result %}
-   {% for value in matrix_result %}
-        <h3 style="text-align: center" >{{ value }}</h3>
-         {% endfor %}
-     {% else %}
-        <p>Didn't get it</p>
-        {% endif %}
-
-<div style="margin-left: 40%">
-{% include 'report.html' %}
     </div>
 
 

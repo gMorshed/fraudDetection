@@ -45,9 +45,9 @@ def run_fraud_predict(dataframe, model):
         clf = load('../svm_all_feature_with_kernal.joblib')
     elif model == "Self Organizing Map":
         som = pickle.load(open("../synthetic_som.p", "rb"))
-        dataframe.rename(columns={"isFraud": "isFraud_ground_truth"}, inplace=True)
-        holding_ground_truth = dataframe['isFraud_ground_truth']
-        dataframe.drop(columns=["isFraud_ground_truth"], inplace=True)
+        # dataframe.rename(columns={"isFraud": "isFraud_ground_truth"}, inplace=True)
+        # holding_ground_truth = dataframe['isFraud_ground_truth']
+        # dataframe.drop(columns=["isFraud_ground_truth"], inplace=True)
         X_test_final = dataframe.to_numpy().tolist()
         X_test = []
         for l in X_test_final:
@@ -55,39 +55,38 @@ def run_fraud_predict(dataframe, model):
             for i in l:
                 dummy_list.append(float(i))
             X_test.append(dummy_list)
-
-        print(type(X_test))
-        print(X_test[0])
         class_assignments = pickle.load(open("../class_assignments.p", "rb"))
         prediction_list = classify(som, X_test, class_assignments)
-        dataframe = dataframe.join(holding_ground_truth)
-        dataframe.insert(14, "fraud_prediction", prediction_list, True)
-        tn, fp, fn, tp = confusion_matrix(dataframe['isFraud_ground_truth'].to_numpy(), prediction_list).ravel()
-        confusion_matrix_simplify = ["True Negative: " + str(tn), "False Positive: " + str(fp),
-                                     "False Negative: " + str(fn), "True Positive: " + str(tp)]
-
-        report = classification_report(dataframe['isFraud_ground_truth'].to_numpy(), prediction_list,
-                                       target_names=['Non-fraud', 'Fraud'], output_dict=True)
+        # dataframe = dataframe.join(holding_ground_truth)
+        dataframe.insert(13, "fraud_prediction", prediction_list, True)
+        # tn, fp, fn, tp = confusion_matrix(dataframe['isFraud_ground_truth'].to_numpy(), prediction_list).ravel()
+        # confusion_matrix_simplify = ["True Negative: " + str(tn), "False Positive: " + str(fp),
+        #                              "False Negative: " + str(fn), "True Positive: " + str(tp)]
+        #
+        # report = classification_report(dataframe['isFraud_ground_truth'].to_numpy(), prediction_list,
+        #                                target_names=['Non-fraud', 'Fraud'], output_dict=True)
         dataframe["fraud_prediction"] = dataframe["fraud_prediction"].apply(func=classify_fradulent)
-        dataframe["isFraud_ground_truth"] = dataframe["isFraud_ground_truth"].apply(func=classify_fradulent)
-        return dataframe, confusion_matrix_simplify, report
+        # dataframe["isFraud_ground_truth"] = dataframe["isFraud_ground_truth"].apply(func=classify_fradulent)
+        return dataframe
+    elif model == "Feed Forward Neural Net":
+        clf = pickle.load(open("../model.p", "rb"))
     else:
         clf = load('../random_forest_w_all_feature.joblib')
-    dataframe.rename(columns={"isFraud": "isFraud_ground_truth"}, inplace=True)
-    holding_ground_truth = dataframe['isFraud_ground_truth']
-    dataframe.drop(columns=["isFraud_ground_truth"], inplace=True)
+    # dataframe.rename(columns={"isFraud": "isFraud_ground_truth"}, inplace=True)
+    # holding_ground_truth = dataframe['isFraud_ground_truth']
+    # dataframe.drop(columns=["isFraud_ground_truth"], inplace=True)
     prediction_list = clf.predict(dataframe.to_numpy())
-    dataframe = dataframe.join(holding_ground_truth)
-    dataframe.insert(14, "fraud_prediction", prediction_list, True)
-    tn, fp, fn, tp = confusion_matrix(dataframe['isFraud_ground_truth'].to_numpy(), prediction_list).ravel()
-    confusion_matrix_simplify = ["True Negative: " + str(tn), "False Positive: " + str(fp),
-                                 "False Negative: " + str(fn), "True Positive: " + str(tp)]
-
-    report = classification_report(dataframe['isFraud_ground_truth'].to_numpy(), prediction_list,
-                                   target_names=['Non-fraud', 'Fraud'], output_dict=True)
+    # dataframe = dataframe.join(holding_ground_truth)
+    dataframe.insert(13, "fraud_prediction", prediction_list, True)
+    # tn, fp, fn, tp = confusion_matrix(dataframe['isFraud_ground_truth'].to_numpy(), prediction_list).ravel()
+    # confusion_matrix_simplify = ["True Negative: " + str(tn), "False Positive: " + str(fp),
+    #                              "False Negative: " + str(fn), "True Positive: " + str(tp)]
+    #
+    # report = classification_report(dataframe['isFraud_ground_truth'].to_numpy(), prediction_list,
+    #                                target_names=['Non-fraud', 'Fraud'], output_dict=True)
     dataframe["fraud_prediction"] = dataframe["fraud_prediction"].apply(func=classify_fradulent)
-    dataframe["isFraud_ground_truth"] = dataframe["isFraud_ground_truth"].apply(func=classify_fradulent)
-    return dataframe, confusion_matrix_simplify, report
+    # dataframe["isFraud_ground_truth"] = dataframe["isFraud_ground_truth"].apply(func=classify_fradulent)
+    return dataframe
 
 
 # Create your views here.
@@ -140,18 +139,10 @@ def profile_upload(request):
     df = pd.DataFrame(rows, columns=features, dtype=float)
     df = df.dropna()
     # render dataframe as html
-    result_df, confusion_matrix_simplify, report = run_fraud_predict(df, model)
+    result_df = run_fraud_predict(df, model)
     html = result_df.to_html()
     # write html to file
     text_file = open("templates/table.html", "w")
     text_file.write(html)
     text_file.close()
-
-    report_dataframe = pd.DataFrame(report).transpose()
-    html = report_dataframe.to_html()
-    # write html to file
-    text_file = open("templates/report.html", "w")
-    text_file.write(html)
-    text_file.close()
-
-    return render(request, 'result.html', {'matrix_result': confusion_matrix_simplify, 'model_name': model})
+    return render(request, 'result.html', {'model_name': model})
