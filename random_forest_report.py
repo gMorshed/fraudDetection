@@ -15,7 +15,7 @@ from sklearn.metrics import classification_report
 
 number_of_fraud_trans = 86
 number_of_non_fraud_trans = 49914 
-inputDataFrame = pd.read_csv('../data.csv')
+inputDataFrame = pd.read_csv('../train_data.csv')
 inputDataFrame.dropna(inplace=True)
 assert inputDataFrame.isnull().sum().sum() == 0
 def f(name):

@@ -1,0 +1,5 @@
+On line 10,11 in main.py you can specifiy the number of fraud and non fraud to sample
+On line 13 to to specifiy the path to train_data
+
+The random_forest_report.py shows the result of the testing data for random forest model with all feature
+line 18 to specify path to train_test data 
