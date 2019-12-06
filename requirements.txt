@@ -1,4 +1,4 @@
-Django==2.2.5
+Django==2.2.8
 django-crispy-forms==1.7.2
 joblib==0.14.0
 MiniSom==2.2.2
