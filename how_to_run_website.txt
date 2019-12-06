@@ -1,0 +1,6 @@
+from termianl cd into ml_final_project directory
+make sure to install the requirements in requirement.txt. I recommend doing that with virtual env
+type "python manage.py runserver"
+ignore the migration warning as we are not using database.
+Go to the website given by developement server
+Interact with the website using the csv file transection_to_test_w.csv
